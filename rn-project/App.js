@@ -1,3 +1,6 @@
+"use strict";
+
+import { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -5,45 +8,121 @@ import {
   ImageBackground,
   TextInput,
   TouchableOpacity,
+  Platform,
+  KeyboardAvoidingView,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
+import * as SplashScreen from "expo-splash-screen";
+import { useFonts } from "expo-font";
+
+const initialState = {
+  name: "",
+  email: "",
+  password: "",
+};
 
 export default function App() {
+  const [isShowKeyboard, setIsShowKeyboard] = useState(false);
+  const [state, setstate] = useState(initialState);
+
+  const [fontsLoaded] = useFonts({
+    "Roboto-Regular": require("./assets/fonts/Roboto-Regular.ttf"),
+    "Roboto-Italic": require("./assets/fonts/Roboto-Italic.ttf"),
+  });
+
+  useEffect(() => {
+    async function prepare() {
+      await SplashScreen.preventAutoHideAsync();
+    }
+    prepare();
+  }, []);
+
+  if (!fontsLoaded) {
+    return;
+  } else {
+    SplashScreen.hideAsync();
+  }
+
+  const changeForm = () => {
+    setIsShowKeyboard(true);
+  };
+
+  const keyboardHide = () => {
+    setIsShowKeyboard(false);
+    Keyboard.dismiss();
+  };
+
+  const submitForm = () => {
+    console.log(state);
+    setstate(initialState);
+  };
+
+  console.log(isShowKeyboard);
   return (
-    <View style={styles.container}>
-      <ImageBackground
-        source={require("./assets/images/photoHero.jpg")}
-        style={styles.image}
-      >
-        <View style={styles.form}>
-          <Text style={styles.title}>Регистрация</Text>
-          <View style={styles.viemInput}>
-            <TextInput
-              style={styles.input}
-              textAlign={"left"}
-              placeholder="Логин"
-            />
-          </View>
-          <View style={{ marginTop: 20 }}>
-            <TextInput
-              style={styles.input}
-              textAlign={"left"}
-              placeholder="Адрес электронной почты"
-            />
-          </View>
-          <View style={{ marginTop: 20, marginBottom: 20 }}>
-            <TextInput
-              style={styles.input}
-              textAlign={"left"}
-              secureTextEntry={true}
-              placeholder="Пароль"
-            />
-          </View>
-          <TouchableOpacity activeOpacity={0.8} style={styles.btn}>
-            <Text>Зарегистрироваться</Text>
-          </TouchableOpacity>
-        </View>
-      </ImageBackground>
-    </View>
+    <TouchableWithoutFeedback onPress={keyboardHide}>
+      <View style={styles.container}>
+        <ImageBackground
+          source={require("./assets/images/photoHero.jpg")}
+          style={styles.image}
+        >
+          <KeyboardAvoidingView
+            behavior={Platform.OS == "ios" ? "padding" : "height"}
+          >
+            <View style={styles.form}>
+              <View style={styles.avatarcontainer}></View>
+              <Text style={styles.title}>Регистрация</Text>
+              <View>
+                <TextInput
+                  style={styles.input}
+                  textAlign={"left"}
+                  placeholder="Логин"
+                  onFocus={changeForm}
+                  value={state.name}
+                  onChangeText={(value) =>
+                    setstate((prevState) => ({ ...prevState, name: value }))
+                  }
+                />
+              </View>
+              <View style={{ marginTop: 20 }}>
+                <TextInput
+                  style={styles.input}
+                  textAlign={"left"}
+                  placeholder="Адрес электронной почты"
+                  onFocus={changeForm}
+                  value={state.email}
+                  onChangeText={(value) =>
+                    setstate((prevState) => ({ ...prevState, email: value }))
+                  }
+                />
+              </View>
+              <View style={{ marginTop: 20 }}>
+                <TextInput
+                  style={styles.input}
+                  textAlign={"left"}
+                  secureTextEntry={true}
+                  placeholder="Пароль"
+                  onFocus={changeForm}
+                  value={state.password}
+                  onChangeText={(value) =>
+                    setstate((prevState) => ({ ...prevState, password: value }))
+                  }
+                />
+              </View>
+              {!isShowKeyboard && (
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={styles.btn}
+                  onPress={submitForm}
+                >
+                  <Text>Зарегистрироваться</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </KeyboardAvoidingView>
+        </ImageBackground>
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -57,21 +136,30 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     justifyContent: "flex-end",
   },
-  viemInput: {
-    marginTop: 33,
+  avatarcontainer: {
+    position: "absolute",
+    top: -60,
+    width: 120,
+    height: 120,
+    backgroundColor: "#f0f8ff",
+    borderRadius: 16,
   },
   form: {
+    position: "relative",
     alignItems: "center",
     backgroundColor: "#FFFFFF",
+
     borderTopRightRadius: 25,
     borderTopLeftRadius: 25,
-    height: 549,
+    width: "100%",
     padding: 15,
   },
+
   title: {
     marginTop: 92,
+    marginBottom: 33,
+    fontFamily: "Roboto-Regular",
     fontSize: 30,
-    fontWeight: "bold",
     textAlign: "center",
     color: "#212121",
   },
@@ -93,5 +181,14 @@ const styles = StyleSheet.create({
     paddingRight: 32,
     backgroundColor: "#FF6C00",
     borderRadius: 100,
+    marginTop: 43,
+    ...Platform.select({
+      ios: {
+        backgroundColor: "#FF6C00",
+      },
+      android: {
+        backgroundColor: "green",
+      },
+    }),
   },
 });
