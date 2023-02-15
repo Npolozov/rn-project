@@ -26,6 +26,8 @@ export default function App() {
   const [isShowKeyboard, setIsShowKeyboard] = useState(false);
   const [state, setstate] = useState(initialState);
 
+  console.log(state);
+
   const [fontsLoaded] = useFonts({
     "Roboto-Regular": require("./assets/fonts/Roboto-Regular.ttf"),
     "Roboto-Italic": require("./assets/fonts/Roboto-Italic.ttf"),
